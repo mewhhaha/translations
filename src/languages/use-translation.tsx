@@ -5,6 +5,7 @@ const s = Symbol();
 
 export const Context = createContext<
   | {
+      locale: string;
       language: string;
       setLocale: (locale: string) => void;
       t: TFunction;

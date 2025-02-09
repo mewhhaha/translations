@@ -7,7 +7,7 @@ import { TranslationProvider } from "./languages/context.tsx";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Suspense>
-      <TranslationProvider defaultLocale="en">
+      <TranslationProvider defaultLocale="eN-uS">
         <App />
       </TranslationProvider>
     </Suspense>

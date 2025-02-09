@@ -1,4 +1,4 @@
-import { use, useCallback, useRef, useState, useTransition } from "react";
+import { use, useCallback, useMemo, useState, useTransition } from "react";
 import { Context, TFunction } from "./use-translation";
 
 const source = import.meta.glob("./*.json", { eager: false }) as Record<
@@ -6,8 +6,8 @@ const source = import.meta.glob("./*.json", { eager: false }) as Record<
   () => Promise<{ default: Record<string, string> }>
 >;
 
-const pull = async (locale: string) => {
-  const r = await source[`./${getLanguage(locale)}.json`]();
+const pull = async (language: string) => {
+  const r = await source[`./${language}.json`]();
   return r.default;
 };
 
@@ -15,31 +15,40 @@ const getLanguage = (locale: string) => {
   return locale.split(/[^a-z]+/)[0]?.toLocaleLowerCase();
 };
 
+const cache: Record<string, Promise<Record<string, string>>> = {};
+
 export const TranslationProvider = ({
   children,
-  defaultLocale: defaultLocaleOrLanguage,
+  defaultLocale,
 }: {
   children: React.ReactNode;
   defaultLocale: string;
 }) => {
   const [, startTransition] = useTransition();
-  const defaultLanguage = getLanguage(defaultLocaleOrLanguage);
 
-  const [language, setLanguage] = useState(defaultLanguage);
-  const state = useRef<Record<string, Promise<Record<string, string>>>>({});
+  const [locale, setInternalLocale] = useState(
+    Intl.getCanonicalLocales(defaultLocale)[0],
+  );
 
-  if (state.current[language] === undefined) {
-    state.current[language] = pull(language);
+  console.log(locale);
+  const language = getLanguage(locale);
+
+  if (cache[language] === undefined) {
+    console.log(cache[language]);
+    cache[language] = pull(language);
   }
 
   const setLocale = useCallback((locale: string) => {
     startTransition(() => {
-      console.debug("Changing language", locale);
-      setLanguage(getLanguage(locale));
+      console.debug(
+        "Changing language to",
+        Intl.getCanonicalLocales(locale)[0],
+      );
+      setInternalLocale(Intl.getCanonicalLocales(locale)[0]);
     });
   }, []);
 
-  const translations = use(state.current[language]);
+  const translations = use(cache[language]);
 
   const t = useCallback<TFunction>(
     (key: string, args?: Record<string, string | number>) => {
@@ -85,5 +94,14 @@ export const TranslationProvider = ({
     },
     [translations],
   );
-  return <Context value={{ language, setLocale, t }}>{children}</Context>;
+  return (
+    <Context
+      value={useMemo(
+        () => ({ language, locale, setLocale, t }),
+        [language, locale, setLocale, t],
+      )}
+    >
+      {children}
+    </Context>
+  );
 };
