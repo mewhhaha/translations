@@ -7,7 +7,6 @@ const source = import.meta.glob("./*.json", { eager: false }) as Record<
 >;
 
 const pull = async (locale: string) => {
-  console.log("pulling", locale);
   const r = await source[`./${getLanguage(locale)}.json`]();
   return r.default;
 };
@@ -48,8 +47,6 @@ export const TranslationProvider = ({
 
       if (args && "count" in args) {
         const count = args.count;
-
-        console.log(translation, count);
 
         let variant: string | undefined;
         if (count === 0) {
