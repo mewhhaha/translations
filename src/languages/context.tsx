@@ -1,4 +1,4 @@
-import { use, useCallback, useState, useTransition } from "react";
+import { use, useCallback, useRef, useState, useTransition } from "react";
 import { Context, TFunction } from "./use-translation";
 
 const source = import.meta.glob("./*.json", { eager: false }) as Record<
@@ -7,6 +7,7 @@ const source = import.meta.glob("./*.json", { eager: false }) as Record<
 >;
 
 const pull = async (locale: string) => {
+  console.log("pulling", locale);
   const r = await source[`./${getLanguage(locale)}.json`]();
   return r.default;
 };
@@ -25,31 +26,23 @@ export const TranslationProvider = ({
   const [, startTransition] = useTransition();
   const defaultLanguage = getLanguage(defaultLocaleOrLanguage);
 
-  const [language, setLanguage] = useState(defaultLocaleOrLanguage);
-  const [state, setState] = useState<
-    Record<string, Promise<Record<string, string>>>
-  >(() => ({
-    [defaultLanguage]: pull(defaultLanguage),
-  }));
+  const [language, setLanguage] = useState(defaultLanguage);
+  const state = useRef<Record<string, Promise<Record<string, string>>>>({});
+
+  if (state.current[language] === undefined) {
+    state.current[language] = pull(language);
+  }
 
   const setLocale = useCallback((locale: string) => {
     const language = getLanguage(locale);
+
     startTransition(() => {
       console.debug("Changing language", locale);
-      setState((prev) => {
-        if (prev[language] !== undefined) {
-          return prev;
-        }
-        return {
-          ...prev,
-          [language]: pull(language),
-        };
-      });
       setLanguage(language);
     });
   }, []);
 
-  const translations = use(state[language]);
+  const translations = use(state.current[language]);
 
   const t = useCallback<TFunction>(
     (key: string, args?: Record<string, string | number>) => {
