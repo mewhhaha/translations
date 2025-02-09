@@ -34,11 +34,9 @@ export const TranslationProvider = ({
   }
 
   const setLocale = useCallback((locale: string) => {
-    const language = getLanguage(locale);
-
     startTransition(() => {
       console.debug("Changing language", locale);
-      setLanguage(language);
+      setLanguage(getLanguage(locale));
     });
   }, []);
 
