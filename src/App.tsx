@@ -37,6 +37,10 @@ function App() {
             <input type="radio" name="language" value="jp"></input>
             jp{" "}
           </label>
+          <label>
+            <input type="radio" name="language" value="pl"></input>
+            pl{" "}
+          </label>
         </fieldset>
         <button>{t("Change language")}</button>
       </form>

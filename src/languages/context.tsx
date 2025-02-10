@@ -48,33 +48,19 @@ export const TranslationProvider = ({
 
   const translations = use(cache[language]);
 
-  const t = useCallback<TFunction>(
-    (key: string, args?: Record<string, string | number>) => {
+  const t = useMemo<TFunction>(() => {
+    const pluralRules = new Intl.PluralRules(locale);
+
+    return (key: string, args?: Record<string, string | number>) => {
       let translation = translations[key] ?? key;
 
-      if (args && "count" in args) {
+      if (args && "count" in args && typeof args.count === "number") {
         const count = args.count;
 
-        let variant: string | undefined;
-        if (count === 0) {
-          variant = translations[`${key}_zero`];
-        } else if (count === 1) {
-          variant = translations[`${key}_one`];
-        } else if (count === 2) {
-          variant = translations[`${key}_two`];
-        } else if (count === 3) {
-          variant = translations[`${key}_few`];
-        } else if (count === 4) {
-          variant = translations[`${key}_many`];
-        } else {
-          variant = translations[`${key}_other`];
-        }
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules
+        const select = pluralRules.select(count);
 
-        if (variant) {
-          translation = variant;
-        } else if (count !== 1) {
-          translation = translations[`${key}_other`] ?? translation;
-        }
+        translation = translations[`${key}_${select}`] ?? translation;
       }
 
       translation = translation.replaceAll(/{{[^}]+}}/g, (match) => {
@@ -83,9 +69,8 @@ export const TranslationProvider = ({
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return translation as any;
-    },
-    [translations],
-  );
+    };
+  }, [locale, translations]);
   return (
     <Context
       value={useMemo(
