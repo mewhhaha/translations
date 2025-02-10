@@ -18,7 +18,7 @@ function App() {
           }
         }}
       >
-        Select language
+        {t("Select language")}
         <fieldset>
           <label>
             <input
@@ -38,7 +38,7 @@ function App() {
             jp{" "}
           </label>
         </fieldset>
-        <button>Change language</button>
+        <button>{t("Change language")}</button>
       </form>
       <main>
         <form
