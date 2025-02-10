@@ -1,6 +1,7 @@
 import { use, useCallback, useMemo, useState, useTransition } from "react";
 import { Context, TFunction } from "./use-translation";
 
+// TODO: Maybe pass this in so you can have separate caches for different components, like namespaces?
 const source = import.meta.glob("./*.json", { eager: false }) as Record<
   string,
   () => Promise<{ default: Record<string, string> }>
@@ -11,11 +12,13 @@ const pull = async (language: string) => {
   return r.default;
 };
 
+const cache: Record<string, Promise<Record<string, string>>> = {};
+
+// Assume the language is en-US, en-GB, etc.
+// and then extract the language part.
 const getLanguage = (locale: string) => {
   return locale.split(/[^a-z]+/)[0]?.toLocaleLowerCase();
 };
-
-const cache: Record<string, Promise<Record<string, string>>> = {};
 
 export const TranslationProvider = ({
   children,

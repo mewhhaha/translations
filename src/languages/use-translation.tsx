@@ -21,6 +21,7 @@ export const useTranslation = () => {
   return value;
 };
 
+// TODO: Maybe make en an interface that can be overloaded by users?
 export interface TFunction {
   <Key extends string>(
     key: NoInfer<Extract<ValidKey<typeof en>, `${Key}${string}`>>,
