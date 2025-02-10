@@ -7,6 +7,7 @@ const source = import.meta.glob("./*.json", { eager: false }) as Record<
 >;
 
 const pull = async (language: string) => {
+  console.log("Pulling", language);
   const r = await source[`./${language}.json`]();
   return r.default;
 };
@@ -77,18 +78,12 @@ export const TranslationProvider = ({
         } else if (count !== 1) {
           translation = translations[`${key}_other`] ?? translation;
         }
-
-        translation = translation.replace("{{count}}", count.toString());
       }
 
-      for (const key in args) {
-        if (key === "count") {
-          continue;
-        }
-        if (typeof args[key] === "string") {
-          translation = translation.replace(`{{${key}}}`, args[key]);
-        }
-      }
+      translation = translation.replaceAll(/{{[^}]+}}/g, (match) => {
+        return args?.[match.slice(2, -2)]?.toString() ?? match;
+      });
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return translation as any;
     },
