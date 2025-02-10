@@ -7,7 +7,6 @@ const source = import.meta.glob("./*.json", { eager: false }) as Record<
 >;
 
 const pull = async (language: string) => {
-  console.log("Pulling", language);
   const r = await source[`./${language}.json`]();
   return r.default;
 };
@@ -31,11 +30,9 @@ export const TranslationProvider = ({
     Intl.getCanonicalLocales(defaultLocale)[0],
   );
 
-  console.log(locale);
   const language = getLanguage(locale);
 
   if (cache[language] === undefined) {
-    console.log(cache[language]);
     cache[language] = pull(language);
   }
 
