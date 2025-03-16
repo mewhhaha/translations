@@ -1,0 +1,42 @@
+{
+  "name": "translations",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "react-router dev",
+    "deploy": "wrangler deploy",
+    "build": "react-router build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "routes": "react-router typegen"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20250313.0",
+    "@mewhhaha/speakeasy": "workspace:*",
+    "isbot": "^5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router": "^7.3.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^0.1.11",
+    "@eslint/js": "^9.22.0",
+    "@react-router/dev": "^7.3.0",
+    "@react-router/fs-routes": "^7.3.0",
+    "@tailwindcss/vite": "^4.0.14",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "eslint": "^9.22.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.18",
+    "globals": "^16.0.0",
+    "prettier": "^3.5.3",
+    "tailwindcss": "^4.0.14",
+    "typescript": "~5.8.2",
+    "typescript-eslint": "^8.26.1",
+    "vite": "^6.2.2",
+    "wrangler": "^4.0.0"
+  }
+}
