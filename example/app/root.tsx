@@ -9,7 +9,7 @@ import {
 import { TranslationProvider } from "@mewhhaha/speakeasy";
 import "./tailwind.css";
 import { Suspense } from "react";
-import { source } from "./languages/languages";
+import { source, fallback } from "./languages/languages";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -37,7 +37,11 @@ export default function Root() {
 
   return (
     <Suspense>
-      <TranslationProvider source={source} defaultLocale={lng ?? "en"}>
+      <TranslationProvider
+        source={source}
+        defaultLocale={lng ?? "en"}
+        fallback={fallback}
+      >
         <Outlet />
       </TranslationProvider>
     </Suspense>

@@ -26,23 +26,21 @@ const Context = createContext<
 /**
  * The expected resulting value for unknown is Record<string, string> or { default: Record<string, string> }
  */
-export type Source = Record<string, unknown | (() => Promise<unknown>)>;
+export type Source = (language: string) => Promise<unknown>;
 
-const pull = async (source: Source | undefined, language: string) => {
+const pull = async (
+  source: Source | undefined,
+  language: string,
+): Promise<Record<string, string>> => {
   if (source === undefined) {
     return {};
   }
 
-  const value = source[`./${language}.json`];
-  const resolved = typeof value !== "function" ? value : await value();
-  if (!resolved) {
+  const value = await source(language);
+  if (!value) {
     return {};
   }
-
-  if ("default" in resolved) {
-    return resolved.default as Record<string, string>;
-  }
-  return resolved as Record<string, string>;
+  return value as Record<string, string>;
 };
 
 const caches: Record<
