@@ -14,10 +14,15 @@ const s = Symbol();
 
 const Context = createContext<
   | {
+      // The same locale that you passed in (not modified)
       locale: string;
+      // The language that we are currently using (using the canonical locale)
       language: string;
+      // Change the locale
       setLocale: (locale: string) => void;
+      // The translation function
       t: TFunction;
+      // Whether we are in a transition when changing locale
       transition: boolean;
     }
   | typeof s
