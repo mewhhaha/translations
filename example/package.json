@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "react-router dev",
-    "deploy": "wrangler deploy",
+    "deploy": "wrangler deploy --config wrangler.deploy.toml",
     "build": "react-router build",
     "lint": "eslint .",
     "preview": "vite preview",
