@@ -43,10 +43,7 @@ const pull = async (
   return value as Record<string, string>;
 };
 
-const caches: Record<
-  string,
-  Record<string, Promise<Record<string, string>>>
-> = {};
+const cache: Record<string, Promise<Record<string, string>>> = {};
 
 // Assume the language is en-US, en-GB, etc.
 // and then extract the language part.
@@ -57,9 +54,7 @@ const getLanguage = (locale: string) => {
 type TranslationProviderProps = {
   children: ReactNode;
   source?: Source;
-  namespace?: string;
   defaultLocale: string;
-  fallback?: Record<string, string>;
 };
 
 /** TranslationProvider will throw to Suspense if the first language isn't loaded yet,
@@ -68,9 +63,7 @@ type TranslationProviderProps = {
 export const TranslationProvider = ({
   children,
   source,
-  namespace = "translation",
   defaultLocale,
-  fallback,
 }: TranslationProviderProps): JSX.Element => {
   const [transition, startTransition] = useTransition();
 
@@ -79,12 +72,6 @@ export const TranslationProvider = ({
   );
 
   const language = getLanguage(locale);
-
-  if (caches[namespace] === undefined) {
-    caches[namespace] = {};
-  }
-
-  const cache = caches[namespace];
 
   if (cache[language] === undefined) {
     cache[language] = pull(source, language);
@@ -103,18 +90,43 @@ export const TranslationProvider = ({
   const translations = use(cache[language]);
 
   const t = useMemo<TFunction>(() => {
-    const pluralRules = new Intl.PluralRules(locale);
+    const cardinalRules = new Intl.PluralRules(locale);
+    const ordinalRules = new Intl.PluralRules(locale, { type: "ordinal" });
 
     return (key: string, args?: Record<string, string | number>) => {
-      let translation = translations[key] ?? fallback?.[key] ?? key;
+      let translation = translations[key] ?? key;
 
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules
+
+      // Count by cardinal
       if (args && "count" in args && typeof args.count === "number") {
-        const count = args.count;
-
-        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules
-        const select = pluralRules.select(count);
-
+        const select = cardinalRules.select(args.count);
         translation = translations[`${key}_${select}`] ?? translation;
+      }
+
+      // Count by ordinal
+      if (
+        args &&
+        "count_ordinal" in args &&
+        typeof args.count_ordinal === "number"
+      ) {
+        const select = ordinalRules.select(args.count_ordinal);
+        translation = translations[`${key}_ordinal_${select}`] ?? translation;
+      }
+
+      // Count by range
+      if (
+        args &&
+        "count_from" in args &&
+        "count_to" in args &&
+        typeof args.count_from === "number" &&
+        typeof args.count_to === "number"
+      ) {
+        const select = cardinalRules.selectRange(
+          args.count_from,
+          args.count_to,
+        );
+        translation = translations[`${key}_range_${select}`] ?? translation;
       }
 
       translation = translation.replaceAll(/{{[^}]+}}/g, (match) => {
@@ -152,7 +164,8 @@ export const useTranslation = (): {
 };
 
 export interface Translation {
-  default: Record<string, string>;
+  // override the "default" key with your translation
+  [key: string]: never;
 }
 
 export interface TFunction {
@@ -166,7 +179,13 @@ export interface TFunction {
       ? []
       : [
           values: {
-            [k in Interpolated<Key>]: [k] extends ["count"] ? number : string;
+            [k in Interpolated<Key>]: [k] extends
+              | ["count"]
+              | ["count_cardinal"]
+              | ["count_from"]
+              | ["count_to"]
+              ? number
+              : string;
           },
         ]
   ): Key;
@@ -174,12 +193,24 @@ export interface TFunction {
 
 type ValidKey<t extends Record<string, string>> = Exclude<
   keyof t,
-  | `${string}_one`
   | `${string}_zero`
+  | `${string}_one`
   | `${string}_two`
   | `${string}_few`
   | `${string}_many`
   | `${string}_other`
+  | `${string}_ordinal_zero`
+  | `${string}_ordinal_one`
+  | `${string}_ordinal_two`
+  | `${string}_ordinal_few`
+  | `${string}_ordinal_many`
+  | `${string}_ordinal_other`
+  | `${string}_range_zero`
+  | `${string}_range_one`
+  | `${string}_range_two`
+  | `${string}_range_few`
+  | `${string}_range_many`
+  | `${string}_range_other`
   | number
   | symbol
 >;
@@ -188,3 +219,12 @@ type Interpolated<T extends string> =
   T extends `${string}{{${infer R}}}${infer rest}`
     ? R | Interpolated<rest>
     : never;
+
+// I don't know why this type doesn't exist
+declare global {
+  namespace Intl {
+    interface PluralRules {
+      selectRange(start: number, end: number): Intl.LDMLPluralRule;
+    }
+  }
+}

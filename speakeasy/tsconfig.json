@@ -3,6 +3,7 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
     "target": "ESNext",
     "module": "NodeNext",
+    "lib": ["DOM", "ESNext"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "nodenext",

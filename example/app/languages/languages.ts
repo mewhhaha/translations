@@ -1,5 +1,11 @@
 import en from "./en.json";
 
+declare module "@mewhhaha/speakeasy" {
+  interface Translation {
+    default: typeof en;
+  }
+}
+
 export const fallback = en;
 
 const glob = import.meta.glob("./*.json");
