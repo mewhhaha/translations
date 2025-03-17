@@ -19,18 +19,8 @@ const Context = createContext<
  */
 export type Source = (language: string) => Promise<unknown>;
 
-const pull = async (
-  source: Source | undefined,
-  language: string,
-): Promise<Record<string, string>> => {
-  if (source === undefined) {
-    return {};
-  }
-
-  const value = await source(language);
-  if (!value) {
-    return {};
-  }
+const pull = async (source: Source | undefined, language: string) => {
+  const value = (await source?.(language)) ?? {};
   return value as Record<string, string>;
 };
 
