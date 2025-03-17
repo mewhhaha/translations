@@ -8,7 +8,7 @@ declare module "@mewhhaha/speakeasy" {
 
 export const fallback = en;
 
-const glob = import.meta.glob("./*.json");
+const glob = import.meta.glob("./*.json", { import: "default" });
 
 export const source = (language: string) => {
   return glob[`./${language}.json`]?.();

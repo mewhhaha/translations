@@ -51,7 +51,7 @@ import { App } from "./app";
 import { render } from "react-dom";
 import { TranslationProvider } from "@mewhhaha/speakeasy";
 
-const glob = import.meta.glob("./languages/*.json");
+const glob = import.meta.glob("./*.json", { import: "default" });
 
 export const source = (language: string) => {
   return glob[`./languages/${language}.json`]?.();
@@ -109,4 +109,16 @@ For range rules, suffix the string with `_range_zero`, `_range_one`, `_range_two
   "{{count_from}}-{{count_to}} cat_range_few": "{{count_from}}-{{count_to}} koty", // 102-104 koty
   "{{count_from}}-{{count_to}} cat_range_many": "{{count_from}}-{{count_to}} kotów" // 102-105 kotów
 }
+```
+
+## Optimization
+
+`vite` does named and default exports for json files by default, so we can disable that for smaller translation payloads.
+
+```ts
+export default defineConfig({
+  json: {
+    namedExports: false,
+  },
+});
 ```
