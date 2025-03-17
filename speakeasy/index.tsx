@@ -42,8 +42,7 @@ type TranslationProviderProps = {
   locale: string;
 };
 
-/** TranslationProvider will throw to Suspense if the first language isn't loaded yet,
- * however any subsequent language changes will be done in a transition.
+/** TranslationProvider will throw to Suspense if the language isn't loaded yet, so wrap any language transitions in startTransition.
  */
 export const TranslationProvider = ({
   children,
