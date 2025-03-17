@@ -198,27 +198,32 @@ export interface TFunction {
 
 type ValidKey<t extends Record<string, string>> = Exclude<
   keyof t,
-  | `${string}_zero`
-  | `${string}_one`
-  | `${string}_two`
-  | `${string}_few`
-  | `${string}_many`
-  | `${string}_other`
-  | `${string}_ordinal_zero`
-  | `${string}_ordinal_one`
-  | `${string}_ordinal_two`
-  | `${string}_ordinal_few`
-  | `${string}_ordinal_many`
-  | `${string}_ordinal_other`
-  | `${string}_range_zero`
-  | `${string}_range_one`
-  | `${string}_range_two`
-  | `${string}_range_few`
-  | `${string}_range_many`
-  | `${string}_range_other`
-  | number
-  | symbol
->;
+  number | symbol
+> extends infer x
+  ? x extends `${infer count_ordinal_range}${
+      | "_ordinal_zero"
+      | "_ordinal_one"
+      | "_ordinal_two"
+      | "_ordinal_few"
+      | "_ordinal_many"
+      | "_ordinal_other"
+      | "_range_zero"
+      | "_range_one"
+      | "_range_two"
+      | "_range_few"
+      | "_range_many"
+      | "_range_other"}`
+    ? count_ordinal_range extends `${infer count}${
+        | "_zero"
+        | "_one"
+        | "_two"
+        | "_few"
+        | "_many"
+        | "_other"}`
+      ? count
+      : count_ordinal_range
+    : x
+  : never;
 
 type Interpolated<T extends string> =
   T extends `${string}{{${infer R}}}${infer rest}`

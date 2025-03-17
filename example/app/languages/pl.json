@@ -4,12 +4,15 @@
   "Name": "Imię",
   "Age": "Wiek",
   "Save": "Zapisz",
+  "Cats": "Koty",
+  "There are {{count_from}}-{{count_to}} cats_range_other": "Jest {{count_from}}-{{count_to}} kotów",
+  "There are {{count_from}}-{{count_to}} cats_range_one": "Jest {{count_from}}-{{count_to}} kot",
+  "There are {{count_from}}-{{count_to}} cats_range_few": "Są {{count_from}}-{{count_to}} koty",
+  "There are {{count_from}}-{{count_to}} cats_range_many": "Jest {{count_from}}-{{count_to}} kotów",
   "My name is {{name}}": "Mam na imię {{name}}",
   "I am {{count}} years old": "Mam {{count}} lat",
   "I am {{count}} years old_one": "Mam {{count}} rok",
-  "I am {{count}} years old_zero": "Mam {{count}} lat",
-  "I am {{count}} years old_two": "Mam {{count}} lata",
   "I am {{count}} years old_few": "Mam {{count}} lata",
   "I am {{count}} years old_many": "Mam {{count}} lat",
-  "I am {{count}} years old_other": "Mam {{count}} lata"
+  "I am {{count}} years old_other": "Mam {{count}} lat"
 }

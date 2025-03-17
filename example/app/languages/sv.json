@@ -5,6 +5,8 @@
   "Age": "Ålder",
   "Save": "Spara",
   "My name is {{name}}": "Jag heter {{name}}",
+  "Cats": "Katter",
+  "There are {{count_from}}-{{count_to}} cats_range_other": "Det finns {{count_from}}-{{count_to}} katter",
   "I am {{count}} years old": "Jag är {{count}} år gammal",
   "I am {{count}} years old_one": "Jag är {{count}} år gammal",
   "I am {{count}} years old_zero": "Jag är nyfödd",

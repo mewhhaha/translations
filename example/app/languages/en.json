@@ -6,6 +6,8 @@
   "Save": "Save",
   "Save the changes": "Save the changes",
   "Save the whales": "Save the whales",
+  "Cats": "Cats",
+  "There are {{count_from}}-{{count_to}} cats_range_other": "There are {{count_from}}-{{count_to}} cats",
   "My name is {{name}}": "My name is {{name}}",
   "I am {{count}} years old": "I am {{count}} years old",
   "I am {{count}} years old_one": "I am {{count}} year old",

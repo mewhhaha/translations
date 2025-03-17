@@ -10,7 +10,7 @@ export default function Home() {
   const lng = searchParams.get("lng");
 
   return (
-    <div>
+    <div dir={lng === "ar" ? "rtl" : "ltr"}>
       <header>
         <form
           onSubmit={(e) => {
@@ -61,6 +61,15 @@ export default function Home() {
               ></input>
               pl{" "}
             </label>
+            <label>
+              <input
+                type="radio"
+                name="language"
+                value="ar"
+                defaultChecked={lng === "ar"}
+              ></input>
+              ar{" "}
+            </label>
           </fieldset>
           <button
             data-transition={transition || undefined}
@@ -97,6 +106,29 @@ export default function Home() {
                 name="age"
               />
             </label>
+            <label className="grid grid-cols-subgrid col-span-2">
+              <span>{t("Cats")} </span>
+              <input
+                type="range"
+                name="cats_to"
+                list="markers"
+                max={10}
+                min={0}
+              />
+              <datalist id="markers">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+              </datalist>
+            </label>
           </div>
           <br />
           <button
@@ -117,6 +149,13 @@ export default function Home() {
           <dd>
             {t("I am {{count}} years old", {
               count: parseInt(formData.get("age")?.toString() || "0"),
+            })}
+          </dd>
+          <dt>{t("Cats")}</dt>
+          <dd>
+            {t("There are {{count_from}}-{{count_to}} cats", {
+              count_from: 0,
+              count_to: parseInt(formData.get("cats_to")?.toString() || "0"),
             })}
           </dd>
         </dl>

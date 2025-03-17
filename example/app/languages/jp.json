@@ -4,6 +4,8 @@
   "Name": "名前",
   "Age": "年齢",
   "Save": "保存",
+  "Cats": "猫",
+  "There are {{count_from}}-{{count_to}} cats_range_other": "{{count_from}}-{{count_to}} 猫",
   "My name is {{name}}": "私の名前は{{name}}です",
   "I am {{count}} years old": "私は{{count}}歳です",
   "I am {{count}} years old_one": "私は{{count}}年です",

@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "index.js",
   "scripts": {
     "build": "tsc -b"
   },
@@ -23,7 +22,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "packageManager": "pnpm@10.6.3",
   "devDependencies": {
     "@types/react": "^19.0.8",
