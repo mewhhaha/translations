@@ -1,29 +1,15 @@
-import {
-  createContext,
-  use,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  useTransition,
-  JSX,
-  ReactNode,
-} from "react";
+import { createContext, use, useContext, useMemo, JSX, ReactNode } from "react";
 
 const s = Symbol();
 
 const Context = createContext<
   | {
-      // The same locale that you passed in (not modified)
+      // The canonical locale of the locale that you passed in
       locale: string;
       // The language that we are currently using (using the canonical locale)
       language: string;
-      // Change the locale
-      setLocale: (locale: string) => void;
       // The translation function
       t: TFunction;
-      // Whether we are in a transition when changing locale
-      transition: boolean;
     }
   | typeof s
 >(s);
@@ -48,7 +34,10 @@ const pull = async (
   return value as Record<string, string>;
 };
 
-const cache: Record<string, Promise<Record<string, string>>> = {};
+const caches: Record<
+  string,
+  Record<string, Promise<Record<string, string>>>
+> = {};
 
 // Assume the language is en-US, en-GB, etc.
 // and then extract the language part.
@@ -59,7 +48,8 @@ const getLanguage = (locale: string) => {
 type TranslationProviderProps = {
   children: ReactNode;
   source?: Source;
-  defaultLocale: string;
+  namespace?: string;
+  locale: string;
 };
 
 /** TranslationProvider will throw to Suspense if the first language isn't loaded yet,
@@ -68,35 +58,29 @@ type TranslationProviderProps = {
 export const TranslationProvider = ({
   children,
   source,
-  defaultLocale,
+  namespace = "translation",
+  locale,
 }: TranslationProviderProps): JSX.Element => {
-  const [transition, startTransition] = useTransition();
+  const canonicalLocale = Intl.getCanonicalLocales(locale)[0];
+  const language = getLanguage(canonicalLocale);
 
-  const [locale, setInternalLocale] = useState(
-    Intl.getCanonicalLocales(defaultLocale)[0],
-  );
+  if (caches[namespace] === undefined) {
+    caches[namespace] = {};
+  }
 
-  const language = getLanguage(locale);
+  const cache = caches[namespace];
 
   if (cache[language] === undefined) {
     cache[language] = pull(source, language);
   }
 
-  const setLocale = useCallback((locale: string) => {
-    startTransition(() => {
-      console.debug(
-        "Changing language to",
-        Intl.getCanonicalLocales(locale)[0],
-      );
-      setInternalLocale(Intl.getCanonicalLocales(locale)[0]);
-    });
-  }, []);
-
   const translations = use(cache[language]);
 
   const t = useMemo<TFunction>(() => {
-    const cardinalRules = new Intl.PluralRules(locale);
-    const ordinalRules = new Intl.PluralRules(locale, { type: "ordinal" });
+    const cardinalRules = new Intl.PluralRules(canonicalLocale);
+    const ordinalRules = new Intl.PluralRules(canonicalLocale, {
+      type: "ordinal",
+    });
 
     return (key: string, args?: Record<string, string | number>) => {
       let translation = translations[key] ?? key;
@@ -104,28 +88,21 @@ export const TranslationProvider = ({
       // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules
 
       // Count by cardinal
-      if (args && "count" in args && typeof args.count === "number") {
+      if (typeof args?.["count"] === "number") {
         const select = cardinalRules.select(args.count);
         translation = translations[`${key}_${select}`] ?? translation;
       }
 
       // Count by ordinal
-      if (
-        args &&
-        "count_ordinal" in args &&
-        typeof args.count_ordinal === "number"
-      ) {
+      if (typeof args?.["count_ordinal"] === "number") {
         const select = ordinalRules.select(args.count_ordinal);
         translation = translations[`${key}_ordinal_${select}`] ?? translation;
       }
 
       // Count by range
       if (
-        args &&
-        "count_from" in args &&
-        "count_to" in args &&
-        typeof args.count_from === "number" &&
-        typeof args.count_to === "number"
+        typeof args?.["count_from"] === "number" &&
+        typeof args?.["count_to"] === "number"
       ) {
         const select = cardinalRules.selectRange(
           args.count_from,
@@ -144,10 +121,7 @@ export const TranslationProvider = ({
   }, [locale, translations]);
   return (
     <Context
-      value={useMemo(
-        () => ({ language, locale, setLocale, t, transition }),
-        [language, locale, setLocale, t, transition],
-      )}
+      value={useMemo(() => ({ language, locale, t }), [language, locale, t])}
     >
       {children}
     </Context>
@@ -157,9 +131,7 @@ export const TranslationProvider = ({
 export const useTranslation = (): {
   locale: string;
   language: string;
-  setLocale: (locale: string) => void;
   t: TFunction;
-  transition: boolean;
 } => {
   const value = useContext(Context);
   if (value === s) {
@@ -186,7 +158,7 @@ export interface TFunction {
           values: {
             [k in Interpolated<Key>]: [k] extends
               | ["count"]
-              | ["count_cardinal"]
+              | ["count_ordinal"]
               | ["count_from"]
               | ["count_to"]
               ? number
@@ -196,32 +168,17 @@ export interface TFunction {
   ): Key;
 }
 
+type PluralRule = "zero" | "one" | "two" | "few" | "many" | "other";
+
 type ValidKey<t extends Record<string, string>> = Exclude<
   keyof t,
   number | symbol
 > extends infer x
-  ? x extends `${infer count_ordinal_range}${
-      | "_ordinal_zero"
-      | "_ordinal_one"
-      | "_ordinal_two"
-      | "_ordinal_few"
-      | "_ordinal_many"
-      | "_ordinal_other"
-      | "_range_zero"
-      | "_range_one"
-      | "_range_two"
-      | "_range_few"
-      | "_range_many"
-      | "_range_other"}`
-    ? count_ordinal_range extends `${infer count}${
-        | "_zero"
-        | "_one"
-        | "_two"
-        | "_few"
-        | "_many"
-        | "_other"}`
+  ? // Check more specific plural rules first, so that _zero doesn't accidentally match _range_zero for example
+    x extends `${infer specific}_${"ordinal" | "range"}_${PluralRule}`
+    ? specific extends `${infer count}_${PluralRule}`
       ? count
-      : count_ordinal_range
+      : specific
     : x
   : never;
 

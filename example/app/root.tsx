@@ -37,7 +37,7 @@ export default function Root() {
 
   return (
     <Suspense>
-      <TranslationProvider source={source} defaultLocale={lng ?? "en"}>
+      <TranslationProvider source={source} locale={lng ?? "en"}>
         <Outlet />
       </TranslationProvider>
     </Suspense>

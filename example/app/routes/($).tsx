@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useTranslation } from "@mewhhaha/speakeasy";
 import { useSearchParams } from "react-router";
 
 export default function Home() {
+  const [transition, startTransition] = useTransition();
   const [formData, setFormData] = useState(new FormData());
-  const { t, setLocale, transition } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   const lng = searchParams.get("lng");
 
@@ -18,8 +19,9 @@ export default function Home() {
             const formData = new FormData(e.currentTarget);
             const lng = formData.get("language")?.toString();
             if (lng) {
-              setLocale(lng);
-              setSearchParams({ lng });
+              startTransition(() => {
+                setSearchParams({ lng });
+              });
             }
           }}
         >
