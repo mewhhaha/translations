@@ -22,9 +22,21 @@ This is a simple translation library for React. It's mainly to be used with natu
 
 ## Usage
 
-Firstly, set up your types by overloading the interface.
+Firstly, keep your translations in some directory
+
+```fs
+- languages/
+  - en.json
+  - sv.json
+  - languages.ts
+- app.tsx
+- main.tsx
+```
+
+Secondly, set up your types by overloading the interface and export the source to your language files.
 
 ```ts
+// languages.ts
 import en from "./en.json";
 
 declare module "@mewhhaha/speakeasy" {
@@ -32,35 +44,27 @@ declare module "@mewhhaha/speakeasy" {
     default: typeof en;
   }
 }
-```
-
-Secondly, keep your translations in some directory
-
-```fs
-- languages/
-  - en.json
-  - sv.json
-- app.tsx
-- main.tsx
-```
-
-Thirdly, just use the vite glob to load your translations, and wrap your app in the `TranslationProvider`.
-
-```tsx
-import { App } from "./app";
-import { render } from "react-dom";
-import { TranslationProvider } from "@mewhhaha/speakeasy";
 
 const glob = import.meta.glob("./*.json", { import: "default" });
 
 export const source = (language: string) => {
-  return glob[`./languages/${language}.json`]?.();
+  return glob[`./${language}.json`]?.();
 };
+```
+
+Thirdly, set up the `TranslationProvider` and pass in the source.
+
+```tsx
+// main.tsx
+import { render } from "react-dom";
+import { TranslationProvider } from "@mewhhaha/speakeasy";
+import { App } from "./app";
+import { source } from "./languages";
 
 const root = document.getElementById("root")!;
 
 render(
-  <TranslationProvider source={source} defaultLocale="en">
+  <TranslationProvider source={source} locale="en">
     <App />
   </TranslationProvider>,
   root,
@@ -70,8 +74,9 @@ render(
 And then use the `useTranslation` hook to get your translations.
 
 ```tsx
+// app.tsx
 export const App = () => {
-  const { t } = useTranslation();
+  const { t /** , language, locale */ } = useTranslation();
 
   return (
     <span className="text-2xl font-bold">
